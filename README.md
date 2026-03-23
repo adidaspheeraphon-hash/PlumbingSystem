@@ -27,12 +27,13 @@
 ## 🛠️ Tech Stack
 
 - **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
-- **Language:** TypeScript 5
-- **Styling:** Tailwind CSS 3, Custom CSS Design System
+- **Language:** TypeScript 5 (Centralized Types)
+- **Styling:** Tailwind CSS 3, Custom Design System
 - **Animation:** Framer Motion
 - **Icons:** Lucide React
-- **Data Fetching:** SWR
-- **Backend:** Google Sheets API (ผ่าน Google Apps Script)
+- **Logic:** Custom Hooks (Encapsulated State)
+- **Data Fetching:** SWR (Revalidation support)
+- **Backend:** Google Apps Script (Custom JSON API)
 
 ---
 
@@ -67,7 +68,7 @@ npm run dev
 
 ```
 src/
-├── app/
+├── app/                          # Application Routes (Next.js App Router)
 │   ├── page.tsx                  # แดชบอร์ด
 │   ├── meter/                    # บันทึกมิเตอร์
 │   ├── billing/
@@ -79,16 +80,23 @@ src/
 │   ├── report/                   # รายงาน
 │   ├── search/                   # ค้นหา
 │   └── settings/                 # ตั้งค่า
-├── components/
+├── components/                   # UI Components แยกตามฟีเจอร์
 │   ├── layout/                   # Layout, Navbar, BottomNav
 │   ├── common/                   # DataTable, SearchBar
 │   ├── dashboard/                # StatCard
 │   ├── billing/                  # ReceiptDetailModal
 │   └── meter/                    # PaymentModal, EditMeterModal
-└── lib/
-    ├── api.ts                    # API Service (Google Sheets)
-    ├── utils.ts                  # Utility functions
-    └── validations.ts            # Input validation
+├── constants/                    # Project-wide Constants & Config
+│   └── index.ts
+├── hooks/                        # Custom React Hooks
+│   └── useInvoices.ts            # Logic สำคัญของระบบใบแจ้งหนี้
+├── lib/                          # Pure Utilities & Validations
+│   ├── utils.ts                  # Utility functions (cn, format)
+│   └── validations.ts            # Input validation logic
+├── services/                     # Domain-driven Services
+│   └── api.ts                    # Google Sheets API Service
+└── types/                        # Centralized TypeScript Definitions
+    └── index.ts                  # Interfaces สำหรับ Data Model
 ```
 
 ---

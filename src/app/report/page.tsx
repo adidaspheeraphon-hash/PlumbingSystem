@@ -2,7 +2,7 @@
 
 import React from "react";
 import useSWR from "swr";
-import { apiService } from "@/lib/api";
+import { apiService } from "@/services/api";
 import { BarChart3, FileLineChart, TrendingUp, DollarSign, Activity } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/utils";

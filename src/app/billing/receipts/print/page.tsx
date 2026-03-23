@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
-import { apiService } from "@/lib/api";
+import { apiService } from "@/services/api";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 function PrintContent() {

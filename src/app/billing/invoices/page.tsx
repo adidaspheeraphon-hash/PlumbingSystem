@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import useSWR from "swr";
-import { apiService, MeterRecord } from "@/lib/api";
 import { Printer, Download, Home, CheckCircle2, AlertCircle, Banknote, Calendar } from "lucide-react";
 import { formatCurrency, formatDate, cn } from "@/lib/utils";
 import PaymentModal from "@/components/meter/PaymentModal";
@@ -10,93 +8,22 @@ import DataTable, { Column } from "@/components/common/DataTable";
 import StatCard from "@/components/dashboard/StatCard";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useInvoices } from "@/hooks/useInvoices";
+import { MeterRecord } from "@/types";
 
 export default function InvoicesPage() {
-  const { data: res, mutate, isLoading } = useSWR("meterRecords", () => apiService.getMeterRecords({ limit: 500 }));
-  const records = useMemo(() => res?.data || [], [res?.data]);
+  const { 
+    records, 
+    displayRecords, 
+    isLoading, 
+    mutate, 
+    filters, 
+    summaries, 
+    handleExportCSV 
+  } = useInvoices();
 
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<MeterRecord | null>(null);
-
-  // Filters State
-  const [statusFilter, setStatusFilter] = useState<"ทั้งหมด" | "ค้างชำระ" | "ชำระแล้ว" | "ชำระบางส่วน">("ทั้งหมด");
-  const [cycleFilter, setCycleFilter] = useState<string>("ทั้งหมด");
-
-  // Extract unique cycles for the dropdown
-  const cycles = useMemo(() => {
-    const unique = new Set<string>();
-    records.forEach(r => {
-      if (r['เดือนรอบบิล']) unique.add(r['เดือนรอบบิล']);
-    });
-    return ["ทั้งหมด", ...Array.from(unique)].sort((a, b) => {
-      if (a === "ทั้งหมด") return -1;
-      if (b === "ทั้งหมด") return 1;
-      return b.localeCompare(a); // Sort descending normally
-    });
-  }, [records]);
-
-  // Derived filtered records
-  const displayRecords = useMemo(() => {
-    return records.filter(m => {
-      const pStatus = m['สถานะชำระ'] || m['สถานะการชำระ'] || 'ค้างชำระ';
-      const pCycle = m['เดือนรอบบิล'] || '';
-
-      const matchStatus = statusFilter === "ทั้งหมด" || pStatus === statusFilter;
-      const matchCycle = cycleFilter === "ทั้งหมด" || pCycle === cycleFilter;
-
-      return matchStatus && matchCycle;
-    });
-  }, [records, statusFilter, cycleFilter]);
-
-  // Calculate summaries based on current filtered records
-  const totalHouses = displayRecords.length;
-  let paidAmount = 0;
-  let paidCount = 0;
-  let unpaidAmount = 0;
-  let unpaidCount = 0;
-  let totalAmount = 0;
-
-  displayRecords.forEach(m => {
-    const status = m['สถานะชำระ'] || m['สถานะการชำระ'] || 'ค้างชำระ';
-    const amount = Number(m['ยอดรวมที่ต้องชำระ'] || m['รวมเงิน'] || 0);
-    totalAmount += amount;
-    if (status === 'ชำระแล้ว') {
-      paidAmount += amount;
-      paidCount++;
-    } else {
-      unpaidAmount += amount;
-      unpaidCount++;
-    }
-  });
-
-  const handleExportCSV = () => {
-    const headers = ["เลขที่ใบแจ้งหนี้", "เดือนรอบบิล", "บ้านเลขที่", "ชื่อเจ้าของ", "มิเตอร์ครั้งก่อน", "มิเตอร์ครั้งนี้", "หน่วยที่ใช้", "ยอดรวมที่ต้องชำระ", "สถานะการชำระ"];
-    const rows = displayRecords.map(m => {
-      const idx = records.indexOf(m);
-      const invNo = `INV-${(m['เดือนรอบบิล'] || '').replace(/-/g, '').substring(0, 6)}-${String(idx + 1).padStart(3, '0')}`;
-      return [
-        invNo,
-        m['เดือนรอบบิล'] || '',
-        m['บ้านเลขที่'] || '',
-        m['ชื่อเจ้าของ'] || '',
-        m['มิเตอร์ครั้งก่อน'] || '',
-        m['มิเตอร์ครั้งนี้'] || '',
-        m['หน่วยที่ใช้'] || '',
-        m['ยอดรวมที่ต้องชำระ'] || m['รวมเงิน'] || 0,
-        m['สถานะชำระ'] || m['สถานะการชำระ'] || 'ค้างชำระ'
-      ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
-    });
-
-    const csvContent = "\uFEFF" + [headers.join(','), ...rows].join('\n'); // Add BOM for Excel Thai support
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `invoices_${cycleFilter !== 'ทั้งหมด' ? cycleFilter : 'all'}_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   const columns: Column<MeterRecord>[] = useMemo(() => [
     {
@@ -190,7 +117,7 @@ export default function InvoicesPage() {
           </button>
 
           <Link
-            href={`/billing/invoices/print?status=${statusFilter}&cycle=${cycleFilter}`}
+            href={`/billing/invoices/print?status=${filters.statusFilter}&cycle=${filters.cycleFilter}`}
             target="_blank"
             className="flex items-center gap-2 px-4 py-2 bg-ocean-600 hover:bg-ocean-700 text-white rounded-xl shadow-sm text-sm font-semibold transition-all"
           >
@@ -204,30 +131,30 @@ export default function InvoicesPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         <StatCard
           label="จำนวนตามเงื่อนไข"
-          value={totalHouses}
+          value={summaries.totalHouses}
           unit="หลังคาเรือน"
           icon={Home}
           delay={0.1}
         />
         <StatCard
           label="ชำระแล้ว"
-          value={formatCurrency(paidAmount).split('.')[0]}
-          unit={`บาท (${paidCount} หลัง)`}
+          value={formatCurrency(summaries.paidAmount).split('.')[0]}
+          unit={`บาท (${summaries.paidCount} หลัง)`}
           icon={CheckCircle2}
           delay={0.2}
           colorClass="text-emerald-600 bg-emerald-50"
         />
         <StatCard
           label="ยังค้างชำระ"
-          value={formatCurrency(unpaidAmount).split('.')[0]}
-          unit={`บาท (${unpaidCount} หลัง)`}
+          value={formatCurrency(summaries.unpaidAmount).split('.')[0]}
+          unit={`บาท (${summaries.unpaidCount} หลัง)`}
           icon={AlertCircle}
           delay={0.3}
           colorClass="text-rose-600 bg-rose-50"
         />
         <StatCard
           label="รวมยอดทั้งหมด"
-          value={formatCurrency(totalAmount).split('.')[0]}
+          value={formatCurrency(summaries.totalAmount).split('.')[0]}
           unit="บาท"
           icon={Banknote}
           delay={0.4}
@@ -242,11 +169,11 @@ export default function InvoicesPage() {
             <Calendar className="w-4 h-4 text-slate-500" />
             <span className="text-sm font-medium text-slate-600">รอบบิล:</span>
             <select
-              value={cycleFilter}
-              onChange={(e) => setCycleFilter(e.target.value)}
+              value={filters.cycleFilter}
+              onChange={(e) => filters.setCycleFilter(e.target.value)}
               className="bg-transparent border-none text-sm font-bold text-ocean-700 focus:ring-0 outline-none cursor-pointer"
             >
-              {cycles.map(c => (
+              {filters.cycles.map(c => (
                 <option key={c} value={c}>{c === 'ทั้งหมด' ? 'ทั้งหมด' : formatDate(c)}</option>
               ))}
             </select>
@@ -257,10 +184,10 @@ export default function InvoicesPage() {
           {(["ทั้งหมด", "ค้างชำระ", "ชำระบางส่วน", "ชำระแล้ว"] as const).map(tab => (
             <button
               key={tab}
-              onClick={() => setStatusFilter(tab)}
+              onClick={() => filters.setStatusFilter(tab)}
               className={cn(
                 "px-4 sm:px-6 py-2 rounded-lg text-sm font-bold transition-all duration-200 whitespace-nowrap",
-                statusFilter === tab
+                filters.statusFilter === tab
                   ? "bg-white text-ocean-700 shadow-sm"
                   : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/50"
               )}

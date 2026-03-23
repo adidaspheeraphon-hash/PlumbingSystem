@@ -2,7 +2,7 @@
 
 import React from "react";
 import useSWR from "swr";
-import { apiService } from "@/lib/api";
+import { apiService } from "@/services/api";
 import StatCard from "@/components/dashboard/StatCard";
 import { Home, FileSpreadsheet, Droplets, ArrowRight } from "lucide-react";
 import Link from "next/link";

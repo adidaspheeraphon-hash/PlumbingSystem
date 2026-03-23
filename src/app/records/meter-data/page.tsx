@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import useSWR from "swr";
-import { apiService, MeterRecord } from "@/lib/api";
+import { apiService } from "@/services/api";
+import { MeterRecord } from "@/types";
 import DataTable from "@/components/common/DataTable";
 import { TableProperties, Edit2 } from "lucide-react";
 import { formatDate, cn } from "@/lib/utils";

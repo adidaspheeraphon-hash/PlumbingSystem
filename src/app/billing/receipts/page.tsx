@@ -2,7 +2,8 @@
 
 import React, { useState, useMemo } from "react";
 import useSWR from "swr";
-import { apiService, MeterRecord } from "@/lib/api";
+import { apiService } from "@/services/api";
+import { MeterRecord } from "@/types";
 import { Receipt, Banknote, CheckCircle2, AlertCircle, Calendar, Download, Printer } from "lucide-react";
 import { formatCurrency, formatDate, cn } from "@/lib/utils";
 import DataTable, { Column } from "@/components/common/DataTable";

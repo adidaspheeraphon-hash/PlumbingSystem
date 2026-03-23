@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { X, Save, AlertCircle, AlertTriangle, Loader2 } from "lucide-react";
-import { MeterRecord, apiService } from "@/lib/api";
+import { apiService } from "@/services/api";
+import { MeterRecord } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 import { validateMeterReading, validateTextLength } from "@/lib/validations";
 import { cn } from "@/lib/utils";

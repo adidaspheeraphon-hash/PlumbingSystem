@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { MeterRecord } from "@/lib/api";
+import { MeterRecord } from "@/types";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { X, CheckCircle2, AlertCircle, Banknote } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";

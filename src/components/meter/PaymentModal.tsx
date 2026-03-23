@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { X, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import { MeterRecord, apiService } from "@/lib/api";
+import { apiService } from "@/services/api";
+import { MeterRecord } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatCurrency, formatDate } from "@/lib/utils";
 

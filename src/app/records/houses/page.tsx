@@ -2,7 +2,7 @@
 
 import React from "react";
 import useSWR from "swr";
-import { apiService } from "@/lib/api";
+import { apiService } from "@/services/api";
 import DataTable from "@/components/common/DataTable";
 import { Users } from "lucide-react";
 import { cn } from "@/lib/utils";

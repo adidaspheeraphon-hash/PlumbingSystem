@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import useSWR from "swr";
-import { apiService } from "@/lib/api";
+import { apiService } from "@/services/api";
 import { Gauge, Save, RotateCcw, Loader2, AlertCircle, AlertTriangle } from "lucide-react";
 import { validateMeterReading, validateTextLength, validateBillingMonth } from "@/lib/validations";
 import { cn } from "@/lib/utils";
