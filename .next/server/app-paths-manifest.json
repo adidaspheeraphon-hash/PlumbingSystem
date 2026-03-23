@@ -1,8 +1,0 @@
-{
-  "/records/meter-data/page": "app/records/meter-data/page.js",
-  "/report/page": "app/report/page.js",
-  "/records/houses/page": "app/records/houses/page.js",
-  "/billing/invoices/page": "app/billing/invoices/page.js",
-  "/billing/receipts/page": "app/billing/receipts/page.js",
-  "/meter/page": "app/meter/page.js"
-}
